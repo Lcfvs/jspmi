@@ -1,6 +1,6 @@
 {
   "name": "jspmi",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "type": "module",
   "description": "A utility to install some NPM dependencies and to push them into an importmap file at once, based on the JSPM Generator",
   "bin": {
@@ -17,5 +17,12 @@
   },
   "devDependencies": {
     "eslint": "^7.32.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lcfvs/jspmi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Lcfvs/jspmi/issues"
   }
 }

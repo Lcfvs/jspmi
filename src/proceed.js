@@ -25,24 +25,34 @@ export default async (options, cmd) => {
 
   const { args } = cmd
 
-  const { dist, map, settings, installer, main } = await read(config)
+  const { locals = {}, map, settings, installer } = await read(config)
 
   await Promise.all(
-    Object.entries({ dist, map, settings, installer, main })
+    Object.entries({ map, settings, installer })
       .map(([key, value]) =>
         value ?? Promise.reject(new Error(`Missing ${key} into your ${config}`))))
 
   const generator = new Generator(settings)
 
-  const { imports: { [dist]: d, ...imports } = {} } = await read(map).catch(() => ({}))
+  const { imports = {} } = await read(map).catch(() => ({}))
 
   const files = args.filter(arg => !arg.startsWith('-'))
 
-  const dependencies = new Set(files.map(arg => arg.match(pattern)[1]))
-
   const flags = args.filter(arg => !files.includes(arg))
 
-  const keys = new Set(Object.keys(imports))
+  const keys = new Set(Object.keys(imports).filter(key => !key.startsWith('/')))
+
+  const dependencies = new Set(files.map(arg => arg.match(pattern)[1]))
+
+  if (command === 'uninstall') {
+    for (const key in keys) {
+      for (const dependency in dependencies) {
+        if (key.startsWith(dependency)) {
+          dependencies.delete(dependency)
+        }
+      }
+    }
+  }
 
   try {
     execSync([installer, command, ...dependencies, ...flags].join(' '), {
@@ -66,7 +76,7 @@ export default async (options, cmd) => {
 
   importmap.imports = {
     ...importmap.imports,
-    [dist]: main
+    ...locals
   }
 
   await write(map, importmap)
